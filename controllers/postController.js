@@ -14,7 +14,7 @@ export const createPost = async (req, res) => {
 
     let imagesLinks = [];
 
-    for (let i = 0; 1 < images.length; i++) {
+    for (let i = 0; i < images.length; i++) {
       const result = await cloudinary.v2.uploader.upload(images[i], {
         folder: "Social/Post",
       });
@@ -24,6 +24,7 @@ export const createPost = async (req, res) => {
         url: result.secure_url,
       });
     }
+    // console.log(imagesLinks);
 
     const owner = req.user;
 
