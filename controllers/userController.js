@@ -20,7 +20,8 @@ export const updateUser = async (req, res) => {
       }
       if (avatar) {
         const result = await cloudinary.v2.uploader.upload(avatar, {
-          folder: "Social/User",
+          folder: "User",
+          upload_preset: "social",
         });
         console.log(result);
         const image = {
