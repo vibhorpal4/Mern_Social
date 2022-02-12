@@ -11,6 +11,11 @@ export const updateUser = async (req, res) => {
     if (req.user.username === userName) {
       const { name, username, email, avatar } = req.body;
       const oldUsername = await User.findOne({ username });
+      if (username === user.username) {
+        return res
+          .status(400)
+          .json({ message: `Please use a different username` });
+      }
       if (oldUsername) {
         return res.status(400).json({ message: `Username is already in use` });
       }
