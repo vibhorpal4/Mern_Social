@@ -19,11 +19,14 @@ export const updateUser = async (req, res) => {
         return res.status(400).json({ message: `Email is already in use` });
       }
       if (avatar) {
+        if (user.avatar.url && user.avatar.public_id) {
+          await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+        }
+
         const result = await cloudinary.v2.uploader.upload(avatar, {
           folder: "User",
           upload_preset: "social",
         });
-        console.log(result);
         const image = {
           public_id: result.public_id,
           url: result.secure_url,
