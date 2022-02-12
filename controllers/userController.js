@@ -3,6 +3,7 @@ import Comment from "../models/commentModel.js";
 import Post from "../models/postModel.js";
 import cloudinary from "cloudinary";
 import ApiFeatures from "../utils/apiFeatures.js";
+import bcrypt from "bcrypt";
 
 export const updateUser = async (req, res) => {
   try {
@@ -229,6 +230,34 @@ export const getFollowings = async (req, res) => {
     return res
       .status(200)
       .json({ message: `Followings loaded successfully`, followings });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error: ${error.message}` });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+    const { oldPassword, password, confirmPassword } = req.body;
+    if (req.user.username !== username) {
+      return res.status(401).json({ message: `Unauthorized Access` });
+    }
+    if (!user) {
+      return res.status(404).json({ message: `User not found` });
+    }
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: `Old Password is not correct` });
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: `Password must be same` });
+    }
+    await user.updateOne({
+      password,
+    });
   } catch (error) {
     return res
       .status(500)

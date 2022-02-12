@@ -13,5 +13,10 @@ router.get("/", authMiddleware, userController.getAllUser);
 router.get("/profile", authMiddleware, userController.getUserProfile);
 router.get("/followers", authMiddleware, userController.getFollowers);
 router.get("/followings", authMiddleware, userController.getFollowings);
+router.put(
+  "/user/:username/change/password",
+  authMiddleware,
+  userController.changePassword
+);
 
 export default router;
