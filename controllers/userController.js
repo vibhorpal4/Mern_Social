@@ -16,6 +16,11 @@ export const updateUser = async (req, res) => {
           .status(400)
           .json({ message: `Please use a different username` });
       }
+      if (email === user.email) {
+        return res
+          .status(400)
+          .json({ message: `Please use a different email` });
+      }
       if (oldUsername) {
         return res.status(400).json({ message: `Username is already in use` });
       }
