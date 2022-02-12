@@ -240,7 +240,7 @@ export const getFollowings = async (req, res) => {
 export const changePassword = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }).select("+password");
     const { oldPassword, password, confirmPassword } = req.body;
     if (req.user.username !== username) {
       return res.status(401).json({ message: `Unauthorized Access` });
