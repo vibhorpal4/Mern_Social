@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema(
         default: "",
       },
     },
+    bio: {
+      type: String,
+      maxlength: 150,
+    },
     posts: [
       {
         type: mongoose.Schema.Types.ObjectId,

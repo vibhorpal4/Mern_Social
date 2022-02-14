@@ -10,7 +10,7 @@ export const updateUser = async (req, res) => {
     const userName = req.params.username;
     const user = await User.findOne({ username: userName });
     if (req.user.username === userName) {
-      const { name, username, email, avatar } = req.body;
+      const { name, username, email, avatar, bio } = req.body;
       const oldUsername = await User.findOne({ username });
       if (username === user.username) {
         return res
@@ -28,6 +28,11 @@ export const updateUser = async (req, res) => {
       const oldEmail = await User.findOne({ email });
       if (oldEmail) {
         return res.status(400).json({ message: `Email is already in use` });
+      }
+      if (bio.length > 150) {
+        return res
+          .status(400)
+          .json({ message: `Bio can be only 150 characters long` });
       }
       if (avatar) {
         if (user.avatar.url && user.avatar.public_id) {
@@ -48,6 +53,7 @@ export const updateUser = async (req, res) => {
           username,
           email,
           avatar: image,
+          bio,
         });
 
         return res.status(200).json({ message: `Profile Update Successfully` });
@@ -56,6 +62,7 @@ export const updateUser = async (req, res) => {
           name,
           username,
           email,
+          bio,
         });
 
         return res.status(200).json({ message: `Profile Update Successfully` });
