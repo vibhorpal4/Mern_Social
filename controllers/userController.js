@@ -29,11 +29,11 @@ export const updateUser = async (req, res) => {
       if (oldEmail) {
         return res.status(400).json({ message: `Email is already in use` });
       }
-      // if (bio?.length > 150) {
-      //   return res
-      //     .status(400)
-      //     .json({ message: `Bio can be only 150 characters long` });
-      // }
+      if (bio?.length > 150) {
+        return res
+          .status(400)
+          .json({ message: `Bio can be only 150 characters long` });
+      }
       if (avatar) {
         if (user.avatar.url && user.avatar.public_id) {
           await cloudinary.v2.uploader.destroy(user.avatar.public_id);
