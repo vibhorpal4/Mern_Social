@@ -215,9 +215,6 @@ export const getFollowers = async (req, res) => {
     const { username } = req.params;
     const user = await User.find({ username });
     const followers = await User.find({ followings: { $in: user._id } });
-    if (followers.length === 0) {
-      return res.status(404).json({ message: `No followers` });
-    }
     return res
       .status(200)
       .json({ message: `Followers loaded successfully`, followers });
@@ -233,9 +230,6 @@ export const getFollowings = async (req, res) => {
     const { username } = req.params;
     const user = await User.find({ username });
     const followings = await User.find({ followers: { $in: user._id } });
-    if (followings.length === 0) {
-      return res.status(404).json({ message: `No followings` });
-    }
     return res
       .status(200)
       .json({ message: `Followings loaded successfully`, followings });
