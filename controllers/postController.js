@@ -179,9 +179,10 @@ export const getTimeLinePost = async (req, res) => {
   }
 };
 
-export const getMyPosts = async (req, res) => {
+export const getUserPosts = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const { username } = req.params;
+    const user = await User.find({ username });
     if (!user) {
       return res.status(404).json({ message: `User not found` });
     }
