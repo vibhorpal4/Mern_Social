@@ -179,23 +179,23 @@ export const getTimeLinePost = async (req, res) => {
   }
 };
 
-export const getUserPosts = async (req, res) => {
-  try {
-    const { username } = req.params;
-    const user = await User.find({ username });
-    if (!user) {
-      return res.status(404).json({ message: `User not found` });
-    }
-    const posts = await Post.find({
-      owner: user._id,
-    });
-    if (!posts) {
-      return res.status(404).json({ message: `No post found` });
-    }
-    return res.status(200).json({ message: `Posts get successfully`, posts });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: `Internal Server Error: ${error.message}` });
-  }
-};
+// export const getUserPosts = async (req, res) => {
+//   try {
+//     const { username } = req.params;
+//     const user = await User.find({ username });
+//     if (!user) {
+//       return res.status(404).json({ message: `User not found` });
+//     }
+//     const posts = await Post.find({
+//       owner: user._id,
+//     });
+//     if (!posts) {
+//       return res.status(404).json({ message: `No post found` });
+//     }
+//     return res.status(200).json({ message: `Posts get successfully`, posts });
+//   } catch (error) {
+//     return res
+//       .status(500)
+//       .json({ message: `Internal Server Error: ${error.message}` });
+//   }
+// };
