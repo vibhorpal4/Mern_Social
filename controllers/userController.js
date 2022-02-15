@@ -212,7 +212,8 @@ export const getUserProfile = async (req, res) => {
 
 export const getFollowers = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const { username } = req.params;
+    const user = await User.find({ username });
     const followers = await User.find({ followings: { $in: user._id } });
     if (followers.length === 0) {
       return res.status(404).json({ message: `No followers` });
@@ -229,7 +230,8 @@ export const getFollowers = async (req, res) => {
 
 export const getFollowings = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const { username } = req.params;
+    const user = await User.find({ username });
     const followings = await User.find({ followers: { $in: user._id } });
     if (followings.length === 0) {
       return res.status(404).json({ message: `No followings` });
