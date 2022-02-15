@@ -213,7 +213,7 @@ export const getUserProfile = async (req, res) => {
 export const getFollowers = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await User.find({ username });
+    const user = await User.findOne({ username });
     const followers = await User.find({ followings: { $in: user._id } });
     return res
       .status(200)
@@ -228,7 +228,8 @@ export const getFollowers = async (req, res) => {
 export const getFollowings = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await User.find({ username });
+    const user = await User.findOne({ username });
+    console.log(user);
     const followings = await User.find({ followers: { $in: user._id } });
     return res
       .status(200)
