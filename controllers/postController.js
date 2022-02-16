@@ -167,9 +167,10 @@ export const getTimeLinePost = async (req, res) => {
     });
     const friendPost = await Promise.all(
       user.followings.map((id) => {
-        Post.find({ owner: id });
+        return Post.find({ owner: id });
       })
     );
+    console.log(friendPost);
     const posts = myPosts.concat(...friendPost);
     res.status(200).json({ message: `Post loaded Successfully`, posts });
   } catch (error) {
