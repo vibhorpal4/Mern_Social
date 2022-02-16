@@ -139,20 +139,21 @@ export const like = async (req, res) => {
     if (!post) {
       return res.status(404).json({ message: `Post not found` });
     }
-    if (post.likes.includes(req.user._id)) {
-      post.updateOne({
+    const reqUser = await User.findById(req.user._id);
+    if (post.likes.includes(reqUser._id)) {
+      await post.updateOne({
         $pull: {
           likes: req.user._id,
         },
       });
-      return res.status(200).json({ message: `Post Liked Successfully` });
+      return res.status(200).json({ message: `Post UnLiked Successfully` });
     } else {
-      post.updateOne({
+      await post.updateOne({
         $push: {
           likes: req.user._id,
         },
       });
-      return res.status(200).json({ message: `Post Unliked Successfully` });
+      return res.status(200).json({ message: `Post Liked Successfully` });
     }
   } catch (error) {
     return res
