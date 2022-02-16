@@ -166,10 +166,10 @@ export const getTimeLinePost = async (req, res) => {
     const user = await User.findById(req.user._id);
     const myPosts = await Post.find({
       owner: user._id,
-    }).populate(owner);
+    });
     const friendPost = await Promise.all(
       user.followings.map((id) => {
-        return Post.find({ owner: id }).populate(owner);
+        return Post.find({ owner: id });
       })
     );
     console.log(friendPost);
