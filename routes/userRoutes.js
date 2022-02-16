@@ -26,5 +26,6 @@ router.put(
   authMiddleware,
   userController.changePassword
 );
+router.get("/user/:id", authMiddleware, userController.getUserById);
 
 export default router;

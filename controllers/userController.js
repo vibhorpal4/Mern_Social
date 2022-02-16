@@ -272,3 +272,15 @@ export const changePassword = async (req, res) => {
       .json({ message: `Internal Server Error: ${error.message}` });
   }
 };
+
+export const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    return res.status(200).json({ message: `User loaded successfully`, user });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error: ${error.message}` });
+  }
+};
