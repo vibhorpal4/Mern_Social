@@ -27,16 +27,15 @@ export const createPost = async (req, res) => {
     }
     // console.log(imagesLinks);
 
-    const owner = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id);
 
     const post = await Post.create({
       caption: req.body.caption,
       images: imagesLinks,
-      owner,
+      owner: user._id,
     });
     await post.save();
 
-    const user = await User.findById(owner._id);
     await user.updateOne({
       $push: {
         posts: post._id,
@@ -82,6 +81,9 @@ export const deletePost = async (req, res) => {
       post.owner.toString() === user._id.toString() ||
       user.isAdmin === true
     ) {
+      for (let i = 0; i < images.length; i++) {
+        await cloudinary.v2.uploader.destroy(images[i].public_id);
+      }
       await user.updateOne({
         $pull: {
           posts: post._id,
@@ -179,24 +181,3 @@ export const getTimeLinePost = async (req, res) => {
       .json({ message: `Internal Server Error: ${error.message}` });
   }
 };
-
-// export const getUserPosts = async (req, res) => {
-//   try {
-//     const { username } = req.params;
-//     const user = await User.find({ username });
-//     if (!user) {
-//       return res.status(404).json({ message: `User not found` });
-//     }
-//     const posts = await Post.find({
-//       owner: user._id,
-//     });
-//     if (!posts) {
-//       return res.status(404).json({ message: `No post found` });
-//     }
-//     return res.status(200).json({ message: `Posts get successfully`, posts });
-//   } catch (error) {
-//     return res
-//       .status(500)
-//       .json({ message: `Internal Server Error: ${error.message}` });
-//   }
-// };

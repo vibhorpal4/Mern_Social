@@ -84,6 +84,9 @@ export const deleteUser = async (req, res) => {
     const { username } = req.params;
     const user = await User.findOne({ username });
     if (req.user.username === user.username || req.user.isAdmin === true) {
+      if (user.avatar.public_id) {
+        await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+      }
       await Post.deleteMany({ owner: user._id });
       await Comment.deleteMany({ owner: user._id });
       await user.remove();
