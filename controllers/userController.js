@@ -248,7 +248,7 @@ export const getAllUser = async (req, res) => {
             },
           ],
         };
-    const users = await User.find({ ...keyword }).limit(100);
+    const users = await User.find({ ...keyword }).limit(20);
     if (users.length === 0) {
       return res.status(404).json({ message: `Users not found` });
     }

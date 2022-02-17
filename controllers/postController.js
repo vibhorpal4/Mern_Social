@@ -104,10 +104,22 @@ export const deletePost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find();
-    if (!posts) {
-      return res.status(404).json({ message: `No posts found` });
-    }
+    const posts = await Post.find({
+      $or: [
+        {
+          owner: {
+            $nin: reqUser.blockedUsers,
+          },
+        },
+        {
+          owner: {
+            $nin: reqUser.blockedByUsers,
+          },
+        },
+      ],
+    })
+      .limit(20)
+      .sort({ createdAt: -1 });
     return res.status(200).json({ message: `Post loaded Successfully`, posts });
   } catch (error) {
     return res
@@ -168,7 +180,8 @@ export const getTimeLinePost = async (req, res) => {
       owner: reqUser._id,
     })
       .populate("owner")
-      .populate(["comments"]);
+      .populate(["comments"])
+      .sort({ createdAt: -1 });
 
     const friendPost = await Post.find({
       owner: {
@@ -188,9 +201,10 @@ export const getTimeLinePost = async (req, res) => {
       ],
     })
       .populate("owner")
-      .populate(["comments", "owner"]);
+      .populate(["comments", "owner"])
+      .sort({ createdAt: -1 });
     const timelinePosts = myPosts.concat(...friendPost);
-    const posts = timelinePosts.slice(0, 100);
+    const posts = timelinePosts.slice(0, 20);
     res.status(200).json({ message: `Post loaded Successfully`, posts });
   } catch (error) {
     return res
