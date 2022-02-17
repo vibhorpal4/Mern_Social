@@ -104,6 +104,8 @@ export const deletePost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
   try {
+    const reqUser = await User.findById(req.user._id);
+
     const posts = await Post.find({
       $or: [
         {
