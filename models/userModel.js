@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
     email: {
       type: String,
@@ -18,6 +19,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       validate: validator.isEmail,
       lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
@@ -64,16 +66,27 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    blokedUsers: [
+    blockedUsers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
-    accountType: {
+    blockedByUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    userType: {
       type: String,
-      default: "Public",
-      enum: ["Private", "Public", "Banned"],
+      lowercase: true,
+      enum: ["private", "public"],
+      default: "public",
+    },
+    isBanned: {
+      type: Boolean,
+      default: false,
     },
 
     resetPasswordToken: String,

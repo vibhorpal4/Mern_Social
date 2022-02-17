@@ -2,7 +2,6 @@ import User from "../models/userModel.js";
 import Comment from "../models/commentModel.js";
 import Post from "../models/postModel.js";
 import cloudinary from "cloudinary";
-import ApiFeatures from "../utils/apiFeatures.js";
 import bcrypt from "bcrypt";
 
 export const updateUser = async (req, res) => {
@@ -10,7 +9,7 @@ export const updateUser = async (req, res) => {
     const userName = req.params.username;
     const user = await User.findOne({ username: userName });
     if (req.user.username === userName) {
-      const { name, username, email, avatar, bio } = req.body;
+      const { name, username, email, avatar, bio, userType } = req.body;
       const oldUsername = await User.findOne({ username });
       if (username === user.username) {
         return res
@@ -56,6 +55,11 @@ export const updateUser = async (req, res) => {
           bio,
         });
 
+        if (userType) {
+          user.userType = userType;
+          await user.save();
+        }
+
         return res.status(200).json({ message: `Profile Update Successfully` });
       } else {
         await user.updateOne({
@@ -64,6 +68,11 @@ export const updateUser = async (req, res) => {
           email,
           bio,
         });
+
+        if (userType) {
+          user.userType = userType;
+          await user.save();
+        }
 
         return res.status(200).json({ message: `Profile Update Successfully` });
       }
@@ -167,13 +176,25 @@ export const getUser = async (req, res) => {
   try {
     const { username } = req.params;
     const user = await User.findOne({ username });
+    const reqUser = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: `User not found` });
     }
-    const posts = await Post.find({ owner: user._id });
-    return res
-      .status(200)
-      .json({ message: `User loaded successfully`, user, posts });
+    if (
+      (reqUser.blockedByUsers.includes(user._id) &&
+        user.blockedUsers.includes(reqUser._id)) ||
+      (reqUser.blockedUsers.includes(user._id) &&
+        user.blockedByUsers.includes(reqUser._id))
+    ) {
+      return res
+        .status(200)
+        .json({ message: `User loaded successfully`, user });
+    } else {
+      const posts = await Post.find({ owner: user._id });
+      return res
+        .status(200)
+        .json({ message: `User loaded successfully`, user, posts });
+    }
   } catch (error) {
     return res
       .status(500)
@@ -183,9 +204,53 @@ export const getUser = async (req, res) => {
 
 export const getAllUser = async (req, res) => {
   try {
-    const apiFeatures = new ApiFeatures(User.find(), req.query).search();
-    const users = await apiFeatures.query;
-    if (!users) {
+    const reqUser = await User.findById(req.user._id);
+    // const apiFeatures = new UsersApiFeatures(User.find(), req.query).search();
+    const keyword = req.query.q
+      ? {
+          $or: [
+            {
+              username: {
+                $regex: req.query.q,
+                $options: "i",
+              },
+            },
+            {
+              name: {
+                $regex: req.query.q,
+                $options: "i",
+              },
+            },
+          ],
+          $and: [
+            {
+              blockedUsers: {
+                $nin: reqUser._id,
+              },
+            },
+            {
+              blockedByUsers: {
+                $nin: reqUser._id,
+              },
+            },
+          ],
+        }
+      : {
+          $and: [
+            {
+              blockedUsers: {
+                $nin: reqUser._id,
+              },
+            },
+            {
+              blockedByUsers: {
+                $nin: reqUser._id,
+              },
+            },
+          ],
+        };
+    const users = await User.find({ ...keyword }).limit(100);
+    if (users.length === 0) {
       return res.status(404).json({ message: `Users not found` });
     }
 
@@ -278,6 +343,74 @@ export const getUserById = async (req, res) => {
     const { id } = req.params;
     const user = await User.findById(id);
     return res.status(200).json({ message: `User loaded successfully`, user });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error: ${error.message}` });
+  }
+};
+
+export const blockUser = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+    const reqUser = await User.findById(req.user._id);
+    if (user.username === reqUser.username) {
+      return res.status(400).json({ message: `You can not block youself` });
+    }
+    if (reqUser.blockedUsers.includes(user._id)) {
+      return res.status(400).json({ message: `User already blocked` });
+    } else {
+      await user.updateOne({
+        $pull: {
+          followers: reqUser._id,
+          followings: reqUser._id,
+        },
+        $push: {
+          blockedByUsers: reqUser._id,
+        },
+      });
+      await reqUser.updateOne({
+        $pull: {
+          followers: user._id,
+          followings: user._id,
+        },
+        $push: {
+          blockedUsers: user._id,
+        },
+      });
+      return res.status(200).json({ message: `User blocked Succressfully` });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error: ${error.message}` });
+  }
+};
+
+export const unBlockUser = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+    const reqUser = await User.findById(req.user._id);
+    if (user.username === reqUser.username) {
+      return res.status(400).json({ message: `You can not unBlock youself` });
+    }
+    if (reqUser.blockedUsers.includes(user._id)) {
+      await reqUser.updateOne({
+        $pull: {
+          blockedUsers: user._id,
+        },
+      });
+      await user.updateOne({
+        $pull: {
+          blockedByUsers: reqUser._id,
+        },
+      });
+      return res.status(200).json({ message: `User unBlocked Succressfully` });
+    } else {
+      return res.status(400).json({ message: `User already unBlocked` });
+    }
   } catch (error) {
     return res
       .status(500)

@@ -27,5 +27,11 @@ router.put(
   userController.changePassword
 );
 router.get("/user/:id", authMiddleware, userController.getUserById);
+router.put("/user/:username/block", authMiddleware, userController.blockUser);
+router.put(
+  "/user/:username/unblock",
+  authMiddleware,
+  userController.unBlockUser
+);
 
 export default router;

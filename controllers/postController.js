@@ -25,7 +25,6 @@ export const createPost = async (req, res) => {
         url: result.secure_url,
       });
     }
-    // console.log(imagesLinks);
 
     const user = await User.findById(req.user._id);
 
@@ -164,16 +163,34 @@ export const like = async (req, res) => {
 
 export const getTimeLinePost = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const reqUser = await User.findById(req.user._id);
     const myPosts = await Post.find({
-      owner: user._id,
-    }).populate(["owner", "comments"]);
-    const friendPost = await Promise.all(
-      user.followings.map((id) => {
-        return Post.find({ owner: id }).populate(["owner", "comments"]);
-      })
-    );
-    const posts = myPosts.concat(...friendPost);
+      owner: reqUser._id,
+    })
+      .populate("owner")
+      .populate(["comments"]);
+
+    const friendPost = await Post.find({
+      owner: {
+        $in: reqUser.followings,
+      },
+      $or: [
+        {
+          owner: {
+            $nin: reqUser.blockedUsers,
+          },
+        },
+        {
+          owner: {
+            $nin: reqUser.blockedByUsers,
+          },
+        },
+      ],
+    })
+      .populate("owner")
+      .populate(["comments", "owner"]);
+    const timelinePosts = myPosts.concat(...friendPost);
+    const posts = timelinePosts.slice(0, 100);
     res.status(200).json({ message: `Post loaded Successfully`, posts });
   } catch (error) {
     return res
