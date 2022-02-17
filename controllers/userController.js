@@ -205,7 +205,6 @@ export const getUser = async (req, res) => {
 export const getAllUser = async (req, res) => {
   try {
     const reqUser = await User.findById(req.user._id);
-    // const apiFeatures = new UsersApiFeatures(User.find(), req.query).search();
     const keyword = req.query.q
       ? {
           $or: [
