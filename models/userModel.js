@@ -70,14 +70,12 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    accountType: [
-      {
-        type: String,
-        ref: "User",
-        default: "Public",
-        enum: ["Private", "Public", "Banned"],
-      },
-    ],
+    accountType: {
+      type: String,
+      default: "Public",
+      enum: ["Private", "Public", "Banned"],
+    },
+
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },
