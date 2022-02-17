@@ -120,6 +120,8 @@ export const getAllPosts = async (req, res) => {
         },
       ],
     })
+      .populate("owner")
+      .populate("comments")
       .limit(20)
       .sort({ createdAt: -1 });
     return res.status(200).json({ message: `Post loaded Successfully`, posts });
@@ -182,7 +184,7 @@ export const getTimeLinePost = async (req, res) => {
       owner: reqUser._id,
     })
       .populate("owner")
-      .populate(["comments"])
+      .populate("comments")
       .sort({ createdAt: -1 });
 
     const friendPost = await Post.find({
@@ -203,7 +205,7 @@ export const getTimeLinePost = async (req, res) => {
       ],
     })
       .populate("owner")
-      .populate(["comments", "owner"])
+      .populate("comments")
       .sort({ createdAt: -1 });
     const timelinePosts = myPosts.concat(...friendPost);
     const posts = timelinePosts.slice(0, 20);
