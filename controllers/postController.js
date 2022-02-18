@@ -224,12 +224,13 @@ export const getTimeLinePost = async (req, res) => {
     })
       .populate("owner")
       .populate("comments")
-      .limit(20)
       .sort({ createdAt: -1 });
+
+    console.log(allPosts);
 
     let timelinePosts;
 
-    if (reqUser.followings.length > 5) {
+    if (reqUser.followings.length < 5) {
       timelinePosts = allPosts;
     } else {
       timelinePosts = myPosts.concat(...friendPost);
