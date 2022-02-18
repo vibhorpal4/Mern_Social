@@ -265,10 +265,13 @@ export const getAllUser = async (req, res) => {
 
 export const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate("posts");
+    const user = await User.findById(req.user._id);
+    const posts = await Post.find({
+      owner: req.user._id,
+    });
     return res
       .status(200)
-      .json({ message: `Profile Loaded Successfully`, user });
+      .json({ message: `Profile Loaded Successfully`, user, posts });
   } catch (error) {
     return res
       .status(500)
