@@ -207,7 +207,34 @@ export const getTimeLinePost = async (req, res) => {
       .populate("owner")
       .populate("comments")
       .sort({ createdAt: -1 });
-    const timelinePosts = myPosts.concat(...friendPost);
+
+    const allPosts = await Post.find({
+      $or: [
+        {
+          owner: {
+            $nin: reqUser.blockedUsers,
+          },
+        },
+        {
+          owner: {
+            $nin: reqUser.blockedByUsers,
+          },
+        },
+      ],
+    })
+      .populate("owner")
+      .populate("comments")
+      .limit(20)
+      .sort({ createdAt: -1 });
+
+    let timelinePosts;
+
+    if (reqUser.followings.length > 5) {
+      timelinePosts = allPosts;
+    } else {
+      timelinePosts = myPosts.concat(...friendPost);
+    }
+
     const posts = timelinePosts.slice(0, 20);
     res.status(200).json({ message: `Post loaded Successfully`, posts });
   } catch (error) {
