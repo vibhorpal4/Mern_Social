@@ -6,7 +6,8 @@ import mongoose from "mongoose";
 import cors from "cors";
 import fileUpload from "express-fileupload";
 import cloudinary from "cloudinary";
-
+import { createServer } from "http";
+import { Server } from "socket.io";
 //import Routes
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
@@ -15,6 +16,12 @@ import userRoutes from "./routes/userRoutes.js";
 
 //Initialing server
 const app = express();
+const server = createServer(app);
+const io = new Server(server);
+
+io.on("connection", (socket) => {
+  console.log("Connected to socket client");
+});
 
 //Middlewares
 app.use(cookieParser());
@@ -45,6 +52,6 @@ cloudinary.config({
 
 //Connecting Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on PORT: ${PORT}`);
 });
