@@ -21,6 +21,9 @@ const io = new Server(server);
 
 io.on("connection", (socket) => {
   console.log("Connected to socket client");
+  socket.emit("greetings", (socket) => {
+    console.log("Hello");
+  });
 });
 
 //Middlewares
