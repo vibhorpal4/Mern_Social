@@ -19,6 +19,8 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
+app.set("socketio", io);
+
 io.on("connection", (socket) => {
   console.log("Connected to socket client");
   socket.emit("greetings", "Hey I am backend ");
