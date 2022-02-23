@@ -33,5 +33,10 @@ router.put(
   authMiddleware,
   userController.unBlockUser
 );
+router.get(
+  "/user/my/notifications",
+  authMiddleware,
+  userController.getUserNotifications
+);
 
 export default router;

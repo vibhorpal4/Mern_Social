@@ -3,6 +3,7 @@ import Comment from "../models/commentModel.js";
 import Post from "../models/postModel.js";
 import cloudinary from "cloudinary";
 import bcrypt from "bcrypt";
+import Notification from "../models/notificationModel.js";
 
 export const updateUser = async (req, res) => {
   try {
@@ -115,6 +116,7 @@ export const deleteUser = async (req, res) => {
 export const follow = async (req, res) => {
   try {
     const { username } = req.params;
+
     const user = await User.findOne({ username });
     const reqUser = await User.findById(req.user._id);
     if (user.username === reqUser.username) {
@@ -123,9 +125,16 @@ export const follow = async (req, res) => {
     if (user.followers.includes(reqUser._id)) {
       return res.status(400).json({ message: `User already followed` });
     } else {
+      const notification = await Notification.create({
+        reciver: user._id,
+        sender: reqUser._id,
+        text: `${reqUser.username} has started following you`,
+      });
+
       await user.updateOne({
         $push: {
           followers: reqUser._id,
+          notifications: notification._id,
         },
       });
       await reqUser.updateOne({
@@ -133,6 +142,7 @@ export const follow = async (req, res) => {
           followings: user._id,
         },
       });
+      req.io.to(user.socketId).emit("Notification", notification.text);
       return res.status(200).json({ message: `User follow Successfully` });
     }
   } catch (error) {
@@ -153,6 +163,10 @@ export const unFollow = async (req, res) => {
     if (!user.followers.includes(reqUser._id)) {
       return res.status(400).json({ message: `User already unfollowed` });
     } else {
+      await Notification.findOneAndDelete({
+        text: `${reqUser.username} has started following you`,
+      });
+
       await user.updateOne({
         $pull: {
           followers: reqUser._id,
@@ -269,9 +283,15 @@ export const getUserProfile = async (req, res) => {
     const posts = await Post.find({
       owner: req.user._id,
     });
-    return res
-      .status(200)
-      .json({ message: `Profile Loaded Successfully`, user, posts });
+    const notifications = await Notification.find({
+      reciver: req.user._id,
+    });
+    return res.status(200).json({
+      message: `Profile Loaded Successfully`,
+      user,
+      posts,
+      notifications,
+    });
   } catch (error) {
     return res
       .status(500)
@@ -412,6 +432,27 @@ export const unBlockUser = async (req, res) => {
     } else {
       return res.status(400).json({ message: `User already unBlocked` });
     }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error: ${error.message}` });
+  }
+};
+
+export const getUserNotifications = async (req, res) => {
+  try {
+    const notifications = await Notification.find({
+      reciver: req.user._id,
+    })
+      .populate("sender")
+      .populate("post")
+      .populate("reciver")
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    return res
+      .status(200)
+      .json({ message: `Notifications loaded successfully`, notifications });
   } catch (error) {
     return res
       .status(500)

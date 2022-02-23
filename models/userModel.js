@@ -88,7 +88,26 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
+    notifications: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Notification",
+      },
+    ],
+    tagedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+    socketId: {
+      type: String,
+      default: "",
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

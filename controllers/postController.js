@@ -1,6 +1,7 @@
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
 import cloudinary from "cloudinary";
+import Notification from "../models/notificationModel.js";
 
 export const createPost = async (req, res) => {
   try {
@@ -154,18 +155,31 @@ export const like = async (req, res) => {
     if (!post) {
       return res.status(404).json({ message: `Post not found` });
     }
+    console.log("hello");
     const reqUser = await User.findById(req.user._id);
+    const user = await User.findById(post.owner);
     if (post.likes.includes(reqUser._id)) {
+      const notification = await Notification.create({
+        sender: reqUser._id,
+        reciver: user._id,
+        post: post._id,
+        text: `${reqUser.username} liked your post`,
+      });
       await post.updateOne({
         $pull: {
-          likes: req.user._id,
+          likes: reqUser._id,
         },
       });
+      req.io.to(user.socketId).emit("Notification", notification.text);
       return res.status(200).json({ message: `Post UnLiked Successfully` });
     } else {
+      await Notification.findOneAndDelete({
+        text: `${reqUser.username} liked your post`,
+        post: post._id,
+      });
       await post.updateOne({
         $push: {
-          likes: req.user._id,
+          likes: reqUser._id,
         },
       });
       return res.status(200).json({ message: `Post Liked Successfully` });
@@ -225,8 +239,6 @@ export const getTimeLinePost = async (req, res) => {
       .populate("owner")
       .populate("comments")
       .sort({ createdAt: -1 });
-
-    console.log(allPosts);
 
     let timelinePosts;
 

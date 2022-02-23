@@ -7,23 +7,47 @@ import cors from "cors";
 import fileUpload from "express-fileupload";
 import cloudinary from "cloudinary";
 import { createServer } from "http";
+import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
+import SocketServer from "./SocketServer.js";
+
 //import Routes
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
+//importing some models for socket
+import User from "./models/userModel.js";
+
 //Initialing server
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-app.set("socketio", io);
+app.use(function (req, res, next) {
+  req.io = io;  
+  next();
+});
 
-io.on("connection", (socket) => {
-  console.log("Connected to socket client");
-  socket.emit("greetings", "Hey I am backend ");
+// io.use((socket, next) => {
+//   const token = socket.handshake.auth.token;
+//   const user = socket.handshake.auth.user;
+//   if (!token) {
+//     return next(new Error("Socket Authentication Error"));
+//   }
+//   socket.reqUser = user;
+//   socket.token = token;
+//   socket.id = user._id;
+//   next();
+// });
+
+io.on("connection", async (socket) => {
+  // await User.findByIdAndUpdate(socket.reqUser._id, {
+  //   isOnline: true,
+  // });
+
+  SocketServer(socket);
 });
 
 //Middlewares

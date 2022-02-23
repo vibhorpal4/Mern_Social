@@ -31,12 +31,12 @@ const postSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    // tagUsers: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "User",
-    //   },
-    // ],
+    tagedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );
