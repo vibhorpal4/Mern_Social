@@ -16,6 +16,7 @@ const notificationSchema = new mongoose.Schema(
     },
     text: {
       type: String,
+      trim: true,
     },
     post: {
       type: mongoose.Schema.Types.ObjectId,

@@ -152,13 +152,29 @@ export const like = async (req, res) => {
   try {
     const { id } = req.params;
     const post = await Post.findById(id);
+
     if (!post) {
       return res.status(404).json({ message: `Post not found` });
     }
-    console.log("hello");
     const reqUser = await User.findById(req.user._id);
-    const user = await User.findById(post.owner);
     if (post.likes.includes(reqUser._id)) {
+      await Notification.findOneAndDelete({
+        text: `${reqUser.username} liked your post`,
+        post: post._id,
+      });
+      await post.updateOne({
+        $pull: {
+          likes: reqUser._id,
+        },
+      });
+      await reqUser.updateOne({
+        $pull: {
+          likedPosts: post._id,
+        },
+      });
+      return res.status(200).json({ message: `Post UnLiked Successfully` });
+    } else {
+      const user = await User.findById(post.owner);
       const notification = await Notification.create({
         sender: reqUser._id,
         reciver: user._id,
@@ -166,22 +182,17 @@ export const like = async (req, res) => {
         text: `${reqUser.username} liked your post`,
       });
       await post.updateOne({
-        $pull: {
-          likes: reqUser._id,
-        },
-      });
-      req.io.to(user.socketId).emit("Notification", notification.text);
-      return res.status(200).json({ message: `Post UnLiked Successfully` });
-    } else {
-      await Notification.findOneAndDelete({
-        text: `${reqUser.username} liked your post`,
-        post: post._id,
-      });
-      await post.updateOne({
         $push: {
           likes: reqUser._id,
         },
       });
+      await reqUser.updateOne({
+        $push: {
+          likedPosts: post._id,
+        },
+      });
+      req.io.to(user.socketId).emit("Notification", notification.text);
+
       return res.status(200).json({ message: `Post Liked Successfully` });
     }
   } catch (error) {
@@ -205,6 +216,7 @@ export const getTimeLinePost = async (req, res) => {
       owner: {
         $in: reqUser.followings,
       },
+
       $or: [
         {
           owner: {
@@ -245,11 +257,48 @@ export const getTimeLinePost = async (req, res) => {
     if (reqUser.followings.length < 5) {
       timelinePosts = allPosts;
     } else {
-      timelinePosts = myPosts.concat(...friendPost);
+      timelinePosts = friendPost.concat(myPosts);
     }
 
     const posts = timelinePosts.slice(0, 20);
     res.status(200).json({ message: `Post loaded Successfully`, posts });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error: ${error.message}` });
+  }
+};
+
+export const savePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findById(id);
+    const user = await User.findById(req.user._id);
+    if (user.savedPosts.includes(post._id)) {
+      await user.updateOne({
+        $pull: {
+          savedPosts: post._id,
+        },
+      });
+      await post.updateOne({
+        $pull: {
+          savedBy: user._id,
+        },
+      });
+      return res.status(200).json({ message: `Post removed from saved posts` });
+    } else {
+      await user.updateOne({
+        $push: {
+          savedPosts: post._id,
+        },
+      });
+      await post.updateOne({
+        $push: {
+          savedBy: user._id,
+        },
+      });
+      return res.status(200).json({ message: `Post added to saved posts` });
+    }
   } catch (error) {
     return res
       .status(500)

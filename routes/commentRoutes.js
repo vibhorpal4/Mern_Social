@@ -9,5 +9,6 @@ router.put("/:id", authMiddleware, commentController.updateComment);
 router.delete("/:id", authMiddleware, commentController.deleteComment);
 router.get("/", authMiddleware, commentController.getAllComments);
 router.get("/:id", authMiddleware, commentController.getComment);
+router.get("/:id/comments", authMiddleware, commentController.getPostComments);
 
 export default router;

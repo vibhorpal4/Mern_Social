@@ -1,12 +1,14 @@
 import Comment from "../models/commentModel.js";
 import User from "../models/userModel.js";
 import Post from "../models/postModel.js";
+import Notification from "../models/notificationModel.js";
 
 export const createComment = async (req, res) => {
   try {
-    const { title } = req.body;
     const { id } = req.params;
+    const { title } = req.body;
     const post = await Post.findById(id);
+
     if (!title) {
       return res.status(400).json({ message: `Please enter comment` });
     }
@@ -15,12 +17,20 @@ export const createComment = async (req, res) => {
       owner: req.user._id,
       post: post._id,
     });
-    await comment.save();
     await post.updateOne({
       $push: {
         comments: comment._id,
       },
     });
+    const reqUser = await User.findById(req.user._id);
+    const user = await User.findById(post.owner);
+    const notification = await Notification.create({
+      sender: reqUser._id,
+      reciver: user._id,
+      post: post._id,
+      text: `${reqUser.username} commented: ${title}`,
+    });
+    req.io.to(user.socketId).emit("Notification", notification.text);
     return res
       .status(201)
       .json({ message: `Comment added Successfully`, comment });
@@ -79,6 +89,11 @@ export const deleteComment = async (req, res) => {
       comment.owner.toString() === req.user._id.toString() ||
       post.owner.toString() === req.user._id.toString()
     ) {
+      const reqUser = await User.findById(req.user._id);
+      await Notification.findOneAndDelete({
+        text: `${reqUser.username} commented: ${comment.title}`,
+        post: post._id,
+      });
       await post.updateOne({
         $pull: {
           comments: comment._id,
@@ -125,6 +140,27 @@ export const getComment = async (req, res) => {
     return res
       .status(200)
       .json({ message: `Comment loaded Successfully`, comment });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error: ${error.message}` });
+  }
+};
+
+export const getPostComments = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const post = await Post.find({
+      _id: id,
+    });
+    const comments = await Comment.find({
+      post: post,
+    }).populate("owner");
+    return res.status(200).json({
+      message: `Comments loaded successfully`,
+      comments,
+    });
   } catch (error) {
     return res
       .status(500)

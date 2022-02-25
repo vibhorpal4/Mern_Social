@@ -128,7 +128,7 @@ export const follow = async (req, res) => {
       const notification = await Notification.create({
         reciver: user._id,
         sender: reqUser._id,
-        text: `${reqUser.username} has started following you`,
+        text: `${reqUser.username} started following you`,
       });
 
       await user.updateOne({
@@ -164,7 +164,8 @@ export const unFollow = async (req, res) => {
       return res.status(400).json({ message: `User already unfollowed` });
     } else {
       await Notification.findOneAndDelete({
-        text: `${reqUser.username} has started following you`,
+        text: `${reqUser.username} started following you`,
+        reciver: user._id,
       });
 
       await user.updateOne({
@@ -194,20 +195,41 @@ export const getUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: `User not found` });
     }
-    if (
-      (reqUser.blockedByUsers.includes(user._id) &&
-        user.blockedUsers.includes(reqUser._id)) ||
-      (reqUser.blockedUsers.includes(user._id) &&
-        user.blockedByUsers.includes(reqUser._id))
-    ) {
-      return res
-        .status(200)
-        .json({ message: `User loaded successfully`, user });
+    if (user.username !== reqUser.username) {
+      if (
+        (reqUser.blockedByUsers.includes(user._id) &&
+          user.blockedUsers.includes(reqUser._id)) ||
+        (reqUser.blockedUsers.includes(user._id) &&
+          user.blockedByUsers.includes(reqUser._id))
+      ) {
+        return res
+          .status(200)
+          .json({ message: `User loaded successfully`, user });
+      } else {
+        const posts = await Post.find({ owner: user._id }).populate("owner");
+        return res
+          .status(200)
+          .json({ message: `User loaded successfully`, user, posts });
+      }
     } else {
-      const posts = await Post.find({ owner: user._id });
-      return res
-        .status(200)
-        .json({ message: `User loaded successfully`, user, posts });
+      const posts = await Post.find({ owner: user._id }).populate("owner");
+      const savedPosts = await Post.find({
+        savedBy: {
+          $in: reqUser._id,
+        },
+      });
+      const tagedPosts = await Post.find({
+        tagedPosts: {
+          $in: reqUser._id,
+        },
+      });
+      return res.status(200).json({
+        message: `User loaded successfully`,
+        user,
+        posts,
+        savedPosts,
+        tagedPosts,
+      });
     }
   } catch (error) {
     return res
@@ -318,7 +340,6 @@ export const getFollowings = async (req, res) => {
   try {
     const { username } = req.params;
     const user = await User.findOne({ username });
-    console.log(user);
     const followings = await User.find({ followers: { $in: user._id } });
     return res
       .status(200)

@@ -26,7 +26,7 @@ const server = createServer(app);
 const io = new Server(server);
 
 app.use(function (req, res, next) {
-  req.io = io;  
+  req.io = io;
   next();
 });
 
@@ -61,7 +61,7 @@ app.use(fileUpload());
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/posts", postRoutes);
-app.use("/api/v1/post/comment", commentRoutes);
+app.use("/api/v1/post/comments", commentRoutes);
 
 //Conneting Database
 const MONGO_URL = process.env.MONGO_URL;

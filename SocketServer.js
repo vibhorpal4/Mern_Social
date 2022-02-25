@@ -29,14 +29,26 @@ const SocketServer = (socket) => {
     );
   });
 
+  socket.on("CommentCreate", (data) => {
+    console.log(data);
+    socket.broadcast.emit("CommentCreate", data);
+  });
+
   socket.on("disconnect", async () => {
     const disconnectedUser = await users.find(
       (usr) => usr.socketId === socket.id
     );
-    const disconnectedUsr = await User.findByIdAndUpdate(disconnectedUser._id, {
-      isOnline: false,
-    });
-    console.log(`${disconnectedUsr.username} had left`);
+    if (disconnectedUser) {
+      const disconnectedUsr = await User.findByIdAndUpdate(
+        disconnectedUser._id,
+        {
+          isOnline: false,
+        }
+      );
+      console.log(`${disconnectedUsr.username} had left`);
+    } else {
+      console.log("error");
+    }
   });
 };
 
