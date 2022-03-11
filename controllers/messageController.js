@@ -5,10 +5,10 @@ import cloudinary from "cloudinary";
 
 export const sendMessage = async (req, res) => {
   try {
-    const { message, media } = req.body;
     const { id } = req.params;
-    const sender = await User.findById(req.user._id);
+    const { message, media } = req.body;
     const reciver = await User.findById(id);
+    const sender = await User.findById(req.user._id);
     const isChat = await Chat.findOne({
       members: {
         $all: [sender._id, reciver._id],
@@ -60,7 +60,7 @@ export const sendMessage = async (req, res) => {
           message,
         });
         await isChat.updateOne({
-          lastMessage: "photo",
+          lastMessage: message,
         });
 
         return res
@@ -69,7 +69,7 @@ export const sendMessage = async (req, res) => {
       } else {
         const chat = await Chat.create({
           members: [sender._id, reciver._id],
-          lastMessage: "photo",
+          lastMessage: message,
         });
         const msg = await Message.create({
           chatId: chat._id,

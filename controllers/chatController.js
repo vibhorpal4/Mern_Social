@@ -26,6 +26,7 @@ export const getAllChats = async (req, res) => {
         $in: [user._id],
       },
     });
+
     return res
       .status(200)
       .json({ message: `Chats loaded successfully`, chats });
