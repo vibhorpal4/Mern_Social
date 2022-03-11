@@ -42,15 +42,15 @@ export const getAllChats = async (req, res) => {
 export const getAllConversionOfChat = async (req, res) => {
   try {
     const { id } = req.params;
-    const reciver = await User.findById(id);
-    const sender = await User.findById(req.user._id);
-    const chat = await Chat.findOne({
-      members: {
-        $all: [sender._id, reciver._id],
-      },
-    });
+    // const reciver = await User.findById(id);
+    // const sender = await User.findById(req.user._id);
+    // const chat = await Chat.findOne({
+    //   members: {
+    //     $all: [sender._id, reciver._id],
+    //   },
+    // });
     const messages = await Message.find({
-      chatId: chat._id,
+      chatId: id,
     });
     return res
       .status(200)
