@@ -12,5 +12,6 @@ router.get("/:id", authMiddleware, postController.getPost);
 router.put("/like/:id", authMiddleware, postController.like);
 router.get("/timeline/post", authMiddleware, postController.getTimeLinePost);
 router.put("/:id/save", authMiddleware, postController.savePost);
+router.get("/saved/posts", authMiddleware, postController.getSavedPosts);
 
 export default router;

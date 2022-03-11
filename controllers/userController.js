@@ -195,41 +195,21 @@ export const getUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: `User not found` });
     }
-    if (user.username !== reqUser.username) {
-      if (
-        (reqUser.blockedByUsers.includes(user._id) &&
-          user.blockedUsers.includes(reqUser._id)) ||
-        (reqUser.blockedUsers.includes(user._id) &&
-          user.blockedByUsers.includes(reqUser._id))
-      ) {
-        return res
-          .status(200)
-          .json({ message: `User loaded successfully`, user });
-      } else {
-        const posts = await Post.find({ owner: user._id }).populate("owner");
-        return res
-          .status(200)
-          .json({ message: `User loaded successfully`, user, posts });
-      }
+
+    if (
+      (reqUser.blockedByUsers.includes(user._id) &&
+        user.blockedUsers.includes(reqUser._id)) ||
+      (reqUser.blockedUsers.includes(user._id) &&
+        user.blockedByUsers.includes(reqUser._id))
+    ) {
+      return res
+        .status(200)
+        .json({ message: `User loaded successfully`, user });
     } else {
       const posts = await Post.find({ owner: user._id }).populate("owner");
-      const savedPosts = await Post.find({
-        savedBy: {
-          $in: reqUser._id,
-        },
-      });
-      const tagedPosts = await Post.find({
-        tagedPosts: {
-          $in: reqUser._id,
-        },
-      });
-      return res.status(200).json({
-        message: `User loaded successfully`,
-        user,
-        posts,
-        savedPosts,
-        tagedPosts,
-      });
+      return res
+        .status(200)
+        .json({ message: `User loaded successfully`, user, posts });
     }
   } catch (error) {
     return res

@@ -305,3 +305,21 @@ export const savePost = async (req, res) => {
       .json({ message: `Internal Server Error: ${error.message}` });
   }
 };
+
+export const getSavedPosts = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const posts = await Post.find({
+      savedBy: {
+        $in: user._id,
+      },
+    }).populate("owner");
+    return res
+      .status(200)
+      .json({ message: `Saved Posts loaded successfully`, posts });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error: ${error.message}` });
+  }
+};

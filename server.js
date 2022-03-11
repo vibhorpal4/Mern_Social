@@ -16,9 +16,8 @@ import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-
-//importing some models for socket
-import User from "./models/userModel.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 //Initialing server
 const app = express();
@@ -30,23 +29,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-// io.use((socket, next) => {
-//   const token = socket.handshake.auth.token;
-//   const user = socket.handshake.auth.user;
-//   if (!token) {
-//     return next(new Error("Socket Authentication Error"));
-//   }
-//   socket.reqUser = user;
-//   socket.token = token;
-//   socket.id = user._id;
-//   next();
-// });
-
 io.on("connection", async (socket) => {
-  // await User.findByIdAndUpdate(socket.reqUser._id, {
-  //   isOnline: true,
-  // });
-
   SocketServer(socket);
 });
 
@@ -62,6 +45,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/posts", postRoutes);
 app.use("/api/v1/post/comments", commentRoutes);
+app.use("/api/v1/chats", chatRoutes);
+app.use("/api/v1/messages", messageRoutes);
 
 //Conneting Database
 const MONGO_URL = process.env.MONGO_URL;
