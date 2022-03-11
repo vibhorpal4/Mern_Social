@@ -25,7 +25,7 @@ export const getAllChats = async (req, res) => {
       members: {
         $in: [user._id],
       },
-    });
+    }).populate("members");
 
     return res
       .status(200)
