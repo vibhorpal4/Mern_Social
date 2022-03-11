@@ -14,11 +14,15 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    body: {
-      message: {
+    message: {
+      type: String,
+    },
+    media: {
+      public_id: {
         type: String,
+        default: "",
       },
-      media: {
+      url: {
         type: String,
         default: "",
       },
