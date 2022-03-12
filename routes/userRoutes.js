@@ -26,7 +26,7 @@ router.put(
   authMiddleware,
   userController.changePassword
 );
-router.get("/user/:id", authMiddleware, userController.getUserById);
+router.get("/user/id/:id", authMiddleware, userController.getUserById);
 router.put("/user/:username/block", authMiddleware, userController.blockUser);
 router.put(
   "/user/:username/unblock",
