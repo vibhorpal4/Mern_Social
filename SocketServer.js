@@ -43,6 +43,7 @@ const SocketServer = (socket) => {
         disconnectedUser._id,
         {
           isOnline: false,
+          lastSeen: Date.now(),
         }
       );
       console.log(`${disconnectedUsr.username} had left`);

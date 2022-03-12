@@ -120,6 +120,10 @@ const userSchema = new mongoose.Schema(
         ref: "Post",
       },
     ],
+    lastSeen: {
+      type: Date,
+      default: Date.now(),
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },
