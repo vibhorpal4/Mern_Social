@@ -25,9 +25,7 @@ export const getAllChats = async (req, res) => {
       members: {
         $in: [user._id],
       },
-    })
-      .populate("members")
-      .sort({ updatedAt: -1 });
+    }).sort({ updatedAt: -1 });
 
     return res
       .status(200)
