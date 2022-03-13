@@ -30,8 +30,11 @@ const SocketServer = (socket) => {
   });
 
   socket.on("CommentCreate", (data) => {
-    console.log(data);
     socket.broadcast.emit("CommentCreate", data);
+  });
+
+  socket.on("SendMessage", (data) => {
+    socket.emit("SendMessage", data);
   });
 
   socket.on("disconnect", async () => {
