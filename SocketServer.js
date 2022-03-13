@@ -34,8 +34,16 @@ const SocketServer = (socket) => {
   });
 
   socket.on("SendMessage", (data) => {
-    socket.emit("SendMessage", data);
+    socket.in(socket.id).emit("SendMessage", data);
   });
+
+  socket.on("typing", () => {
+    socket.in(socket.id).emit("typing");
+  });
+
+  socket.on('stopTyping' = () => {
+    socket.in(socket.id).emit('stopTyping')
+  })
 
   socket.on("disconnect", async () => {
     const disconnectedUser = await users.find(
