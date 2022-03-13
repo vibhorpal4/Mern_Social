@@ -24,7 +24,7 @@ export const createComment = async (req, res) => {
     });
     const reqUser = await User.findById(req.user._id);
     const user = await User.findById(post.owner);
-    if (reqUser._id === user._id) {
+    if (reqUser._id !== user._id) {
       const notification = await Notification.create({
         sender: reqUser._id,
         reciver: user._id,

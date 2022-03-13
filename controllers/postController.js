@@ -185,7 +185,7 @@ export const like = async (req, res) => {
         },
       });
       const user = await User.findById(post.owner);
-      if (reqUser._id === user._id) {
+      if (reqUser._id !== user._id) {
         const notification = await Notification.create({
           sender: reqUser._id,
           reciver: user._id,
