@@ -174,13 +174,6 @@ export const like = async (req, res) => {
       });
       return res.status(200).json({ message: `Post UnLiked Successfully` });
     } else {
-      const user = await User.findById(post.owner);
-      const notification = await Notification.create({
-        sender: reqUser._id,
-        reciver: user._id,
-        post: post._id,
-        text: `${reqUser.username} liked your post`,
-      });
       await post.updateOne({
         $push: {
           likes: reqUser._id,
@@ -191,7 +184,16 @@ export const like = async (req, res) => {
           likedPosts: post._id,
         },
       });
-      req.io.to(user.socketId).emit("Notification", notification.text);
+      const user = await User.findById(post.owner);
+      if (reqUser._id === user._id) {
+        const notification = await Notification.create({
+          sender: reqUser._id,
+          reciver: user._id,
+          post: post._id,
+          text: `${reqUser.username} liked your post`,
+        });
+        req.io.to(user.socketId).emit("Notification", notification.text);
+      }
 
       return res.status(200).json({ message: `Post Liked Successfully` });
     }

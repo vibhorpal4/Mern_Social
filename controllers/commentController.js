@@ -24,13 +24,15 @@ export const createComment = async (req, res) => {
     });
     const reqUser = await User.findById(req.user._id);
     const user = await User.findById(post.owner);
-    const notification = await Notification.create({
-      sender: reqUser._id,
-      reciver: user._id,
-      post: post._id,
-      text: `${reqUser.username} commented: ${title}`,
-    });
-    req.io.to(user.socketId).emit("Notification", notification.text);
+    if (reqUser._id === user._id) {
+      const notification = await Notification.create({
+        sender: reqUser._id,
+        reciver: user._id,
+        post: post._id,
+        text: `${reqUser.username} commented: ${title}`,
+      });
+      req.io.to(user.socketId).emit("Notification", notification.text);
+    }
     return res
       .status(201)
       .json({ message: `Comment added Successfully`, comment });
