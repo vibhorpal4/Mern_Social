@@ -48,7 +48,7 @@ const SocketServer = (socket) => {
       );
       console.log(`${disconnectedUsr.username} had left`);
     } else {
-      console.log("error");
+      console.log("Socket error");
     }
   });
 };
