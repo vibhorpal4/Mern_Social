@@ -42,7 +42,7 @@ const SocketServer = (socket) => {
     const chatId = data.chatId;
     const chat = await Chat.findById(chatId);
 
-    socket.in(socket.id).emit("SendMessage", data);
+    socket.emit("SendMessage", data);
   });
 
   // socket.on("typing", () => {
