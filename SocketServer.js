@@ -1,6 +1,7 @@
 import User from "./models/userModel.js";
 import Post from "./models/postModel.js";
 import Notification from "./models/notificationModel.js";
+import Chat from "./models/chatsModel.js";
 
 let users = [];
 
@@ -33,17 +34,24 @@ const SocketServer = (socket) => {
     socket.broadcast.emit("CommentCreate", data);
   });
 
-  socket.on("SendMessage", (data) => {
+  socket.on("joinChat", (data) => {
+    socket.join(data);
+  });
+
+  socket.on("SendMessage", async (data) => {
+    const chatId = data.chatId;
+    const chat = await Chat.findById(chatId);
+
     socket.in(socket.id).emit("SendMessage", data);
   });
 
-  socket.on("typing", () => {
-    socket.in(socket.id).emit("typing");
-  });
+  // socket.on("typing", () => {
+  //   socket.in(socket.id).emit("typing");
+  // });
 
-  socket.on('stopTyping' = () => {
-    socket.in(socket.id).emit('stopTyping')
-  })
+  // socket.on('stopTyping' = () => {
+  //   socket.in(socket.id).emit('stopTyping')
+  // })
 
   socket.on("disconnect", async () => {
     const disconnectedUser = await users.find(
